@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>App A - FDC3 Open Caller</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 24px; background: #1a1a2e; color: #eee; }
+        h1 { font-size: 18px; margin-bottom: 16px; color: #64ffda; }
+        .card { background: #16213e; border-radius: 8px; padding: 16px; margin-bottom: 16px; border: 1px solid #0f3460; }
+        label { display: block; font-size: 12px; color: #aaa; margin-bottom: 4px; }
+        input, select { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #0f3460; background: #0f3460; color: #eee; margin-bottom: 12px; font-size: 13px; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600; }
+        .btn-primary { background: #64ffda; color: #1a1a2e; }
+        .btn-primary:hover { background: #4dd0b8; }
+        .btn-primary:disabled { background: #333; color: #666; cursor: not-allowed; }
+        #log { background: #0d1b2a; border-radius: 4px; padding: 12px; font-family: 'Fira Code', monospace; font-size: 12px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+        .log-entry { margin-bottom: 4px; }
+        .log-success { color: #64ffda; }
+        .log-error { color: #ff6b6b; }
+        .log-info { color: #74b9ff; }
+        .status { font-size: 12px; padding: 4px 8px; border-radius: 12px; display: inline-block; margin-bottom: 12px; }
+        .status-connected { background: #1b4332; color: #64ffda; }
+        .status-disconnected { background: #3d0000; color: #ff6b6b; }
+    </style>
+</head>
+<body>
+    <h1>App A — FDC3 Open Caller</h1>
+    <span id="status" class="status status-disconnected">Waiting for FDC3...</span>
+
+    <div class="card">
+        <label>Target App ID</label>
+        <input type="text" id="appId" value="app-b">
+
+        <label>Context Type</label>
+        <input type="text" id="contextType" value="fdc3.contact">
+
+        <label>Context ID (UEN)</label>
+        <input type="text" id="contextId" value="12345">
+
+        <label>Instance ID (optional — leave blank for new/any)</label>
+        <input type="text" id="instanceId" placeholder="e.g. endpoint-id-here">
+
+        <button class="btn-primary" id="openBtn" disabled>fdc3.open()</button>
+    </div>
+
+    <div class="card">
+        <label>Log</label>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        const logEl = document.getElementById('log');
+        const statusEl = document.getElementById('status');
+        const openBtn = document.getElementById('openBtn');
+
+        function log(msg, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        async function waitForFDC3() {
+            if (typeof fdc3 !== 'undefined') return fdc3;
+            return new Promise((resolve) => {
+                window.addEventListener('fdc3Ready', () => resolve(window.fdc3));
+                setTimeout(() => {
+                    if (typeof fdc3 !== 'undefined') resolve(window.fdc3);
+                }, 5000);
+            });
+        }
+
+        async function init() {
+            log('Waiting for FDC3 API...', 'info');
+            try {
+                const api = await waitForFDC3();
+                if (!api) {
+                    log('FDC3 API not available. Make sure this is running inside OpenFin.', 'error');
+                    return;
+                }
+                statusEl.textContent = 'FDC3 Ready';
+                statusEl.className = 'status status-connected';
+                openBtn.disabled = false;
+                log('FDC3 API ready', 'success');
+
+                const info = await fdc3.getInfo();
+                log(`FDC3 version: ${info.fdc3Version}, provider: ${info.provider}`, 'info');
+            } catch (e) {
+                log(`Init error: ${e.message}`, 'error');
+            }
+        }
+
+        openBtn.addEventListener('click', async () => {
+            const appId = document.getElementById('appId').value;
+            const contextType = document.getElementById('contextType').value;
+            const contextId = document.getElementById('contextId').value;
+            const instanceId = document.getElementById('instanceId').value.trim();
+
+            const app = instanceId ? { appId, instanceId } : { appId };
+            const context = {
+                type: contextType,
+                id: { uen: contextId },
+                name: `Contact ${contextId}`
+            };
+
+            log(`Calling fdc3.open(${JSON.stringify(app)}, ${JSON.stringify(context)})`, 'info');
+
+            try {
+                const result = await fdc3.open(app, context);
+                log(`fdc3.open returned: ${JSON.stringify(result)}`, 'success');
+            } catch (e) {
+                log(`fdc3.open FAILED: ${e.message}`, 'error');
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>

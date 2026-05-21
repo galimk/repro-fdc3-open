@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FDC3 Open Repro — SUPPORT-2343</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 40px; background: #1a1a2e; color: #eee; max-width: 700px; margin: 0 auto; }
+        h1 { font-size: 22px; margin-bottom: 8px; color: #64ffda; }
+        .subtitle { color: #aaa; margin-bottom: 24px; font-size: 14px; }
+        .card { background: #16213e; border-radius: 8px; padding: 20px; margin-bottom: 16px; border: 1px solid #0f3460; }
+        .card h2 { font-size: 15px; margin-bottom: 8px; }
+        .card p { font-size: 13px; color: #b2bec3; line-height: 1.6; }
+        a { color: #74b9ff; }
+        code { background: #0f3460; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+        pre { background: #0d1b2a; padding: 12px; border-radius: 4px; font-size: 12px; overflow-x: auto; margin-top: 12px; color: #dfe6e9; }
+        .steps { list-style: none; counter-reset: step; }
+        .steps li { counter-increment: step; padding: 8px 0; font-size: 13px; color: #b2bec3; }
+        .steps li::before { content: counter(step); background: #0f3460; color: #64ffda; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; margin-right: 8px; }
+    </style>
+</head>
+<body>
+    <h1>FDC3 Open Repro — SUPPORT-2343</h1>
+    <p class="subtitle">Reproduces: addContextListener fails when "Allow Duplication" is enabled</p>
+
+    <div class="card">
+        <h2>Pages</h2>
+        <p>
+            <a href="/app-a.html">/app-a.html</a> — Caller app (invokes <code>fdc3.open</code>)<br>
+            <a href="/app-b.html">/app-b.html</a> — Listener app (registers <code>fdc3.addContextListener</code>)
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Repro Steps</h2>
+        <ol class="steps">
+            <li>Add the apps below to your cloud-platform app directory (or inline config)</li>
+            <li>Launch the platform with openfin-direct locally</li>
+            <li>Open App B — verify it shows "FDC3 Ready — Listening"</li>
+            <li>Open App A — click the <code>fdc3.open()</code> button</li>
+            <li><strong>Expected:</strong> App B shows the received context</li>
+            <li><strong>With allowDuplication ON + App B already open:</strong> Context is never received</li>
+        </ol>
+    </div>
+
+    <div class="card">
+        <h2>App Directory Entries</h2>
+        <p>Add these to your platform's app directory config (or paste into the apps endpoint response):</p>
+        <pre>{
+  "apps": [
+    {
+      "appId": "app-a",
+      "title": "App A (FDC3 Open Caller)",
+      "manifestType": "inline-view",
+      "manifest": {
+        "url": "http://localhost:8082/app-a.html",
+        "fdc3InteropApi": "2.0"
+      },
+      "icons": [],
+      "publisher": "repro"
+    },
+    {
+      "appId": "app-b",
+      "title": "App B (Context Listener)",
+      "manifestType": "inline-view",
+      "manifest": {
+        "url": "http://localhost:8082/app-b.html",
+        "fdc3InteropApi": "2.0"
+      },
+      "customConfig": {
+        "allowDuplication": true
+      },
+      "interop": {
+        "intents": {
+          "listensFor": {}
+        },
+        "userChannels": { "broadcasts": [], "listensFor": ["fdc3.contact"] }
+      },
+      "icons": [],
+      "publisher": "repro"
+    }
+  ]
+}</pre>
+    </div>
+
+    <div class="card">
+        <h2>What to Compare</h2>
+        <p>
+            <strong>Working case:</strong> Set <code>"allowDuplication": false</code> (or remove the field) in App B's config.
+            Open App B, then call <code>fdc3.open</code> from App A → context arrives.
+        </p>
+        <p style="margin-top: 8px;">
+            <strong>Broken case:</strong> Keep <code>"allowDuplication": true</code>.
+            Open App B first, then call <code>fdc3.open</code> from App A → context never arrives
+            (or <code>AppTimeout</code> error in App A).
+        </p>
+    </div>
+</body>
+</html>
