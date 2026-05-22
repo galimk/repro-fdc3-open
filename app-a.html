@@ -62,20 +62,20 @@
             logEl.scrollTop = logEl.scrollHeight;
         }
 
-        async function waitForFDC3() {
-            if (typeof fdc3 !== 'undefined') return fdc3;
-            return new Promise((resolve) => {
-                window.addEventListener('fdc3Ready', () => resolve(window.fdc3));
-                setTimeout(() => {
-                    if (typeof fdc3 !== 'undefined') resolve(window.fdc3);
-                }, 5000);
-            });
+        async function ensureFDC3() {
+            if (window.fdc3) return window.fdc3;
+            if (!window.fin || !window.fdc3) {
+                const url = 'https://built-on-openfin.github.io/web-starter/web/v21.0.0/web-client-api/js/web.client.api.bundle.js';
+                const webClient = await import(url);
+                await webClient.getAPI({ target: window, api: { fin: true, fdc3: true, fdc3Version: '2.0' }, requestConnectOptions: { strategy: 'request-on-failure' } });
+            }
+            return window.fdc3;
         }
 
         async function init() {
             log('Waiting for FDC3 API...', 'info');
             try {
-                const api = await waitForFDC3();
+                const api = await ensureFDC3();
                 if (!api) {
                     log('FDC3 API not available. Make sure this is running inside OpenFin.', 'error');
                     return;
