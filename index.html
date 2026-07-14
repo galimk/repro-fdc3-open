@@ -27,8 +27,44 @@
         <h2>Pages</h2>
         <p>
             <a href="app-a.html">app-a.html</a> — Caller app (invokes <code>fdc3.open</code>)<br>
-            <a href="app-b.html">app-b.html</a> — Listener app (registers <code>fdc3.addContextListener</code>)
+            <a href="app-b.html">app-b.html</a> — Listener app (registers <code>fdc3.addContextListener</code>)<br>
+            <a href="sc-person.html">sc-person.html</a> — SuperComplete source (person / phone / address facts)<br>
+            <a href="sc-address-form.html">sc-address-form.html</a> — SuperComplete target (empty address form + nested scroll)
         </p>
+    </div>
+
+    <div class="card">
+        <h2>SuperComplete smoke test</h2>
+        <ol class="steps">
+            <li>Register the two SuperComplete apps below in admin content (HERE API access not required for plain web forms)</li>
+            <li>Open <code>sc-person.html</code> and leave it visible</li>
+            <li>Open <code>sc-address-form.html</code>, focus a field, run SuperComplete</li>
+            <li>Scroll inside the form panel to check bubble repositioning</li>
+        </ol>
+        <pre>{
+  "apps": [
+    {
+      "appId": "sc-person",
+      "title": "SC Person Source",
+      "manifestType": "inline-view",
+      "manifest": {
+        "url": "https://galimk.github.io/repro-fdc3-open/sc-person.html"
+      },
+      "icons": [],
+      "publisher": "repro"
+    },
+    {
+      "appId": "sc-address-form",
+      "title": "SC Address Form",
+      "manifestType": "inline-view",
+      "manifest": {
+        "url": "https://galimk.github.io/repro-fdc3-open/sc-address-form.html"
+      },
+      "icons": [],
+      "publisher": "repro"
+    }
+  ]
+}</pre>
     </div>
 
     <div class="card">

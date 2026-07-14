@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperComplete Target — Address Form</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 24px;
+            background: #1a1a2e;
+            color: #eee;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        h1 { font-size: 18px; margin-bottom: 6px; color: #e17055; }
+        .subtitle { font-size: 13px; color: #aaa; margin-bottom: 16px; line-height: 1.5; }
+        code { background: #0f3460; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+        .scroll {
+            height: 62vh;
+            overflow: auto;
+            border: 1px solid #0f3460;
+            border-radius: 8px;
+            background: #16213e;
+            padding: 16px;
+        }
+        .pad {
+            height: 36vh;
+            border-radius: 6px;
+            background: #0d1b2a;
+            color: #636e72;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+        form { display: grid; gap: 12px; }
+        .field { display: flex; flex-direction: column; gap: 4px; }
+        .field.row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .field.row-2 > .field { display: flex; flex-direction: column; gap: 4px; }
+        label { font-size: 12px; color: #aaa; }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid #0f3460;
+            background: #0d1b2a;
+            color: #eee;
+            font: inherit;
+            font-size: 14px;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: 2px solid #74b9ff;
+            outline-offset: 1px;
+        }
+        button {
+            margin-top: 8px;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 6px;
+            background: #0f3460;
+            color: #64ffda;
+            font: inherit;
+            font-size: 13px;
+            cursor: pointer;
+            width: fit-content;
+        }
+        button:hover { background: #1b3a66; }
+        .hint { font-size: 12px; color: #888; margin-top: 12px; line-height: 1.4; }
+    </style>
+</head>
+<body>
+    <h1>Shipping Address Form (SuperComplete Target)</h1>
+    <p class="subtitle">
+        Focus a field and use SuperComplete. Keep
+        <code>sc-person.html</code> open in another view for source context.
+        The form sits in a nested scroll area to exercise bubble repositioning.
+    </p>
+
+    <div class="scroll" id="formScroll">
+        <div class="pad">Scroll down into the form (nested overflow)</div>
+
+        <form id="addressForm" autocomplete="off">
+            <div class="field">
+                <label for="fullName">Full name</label>
+                <input id="fullName" name="fullName" type="text" />
+            </div>
+            <div class="field">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" />
+            </div>
+            <div class="field">
+                <label for="phone">Phone</label>
+                <input id="phone" name="phone" type="tel" />
+            </div>
+            <div class="field">
+                <label for="company">Company</label>
+                <input id="company" name="company" type="text" />
+            </div>
+            <div class="field">
+                <label for="street">Street address</label>
+                <input id="street" name="street" type="text" />
+            </div>
+            <div class="field">
+                <label for="unit">Apt / Suite / Unit</label>
+                <input id="unit" name="unit" type="text" />
+            </div>
+            <div class="field">
+                <label for="city">City</label>
+                <input id="city" name="city" type="text" />
+            </div>
+            <div class="field row-2">
+                <div class="field">
+                    <label for="state">State / Province</label>
+                    <input id="state" name="state" type="text" />
+                </div>
+                <div class="field">
+                    <label for="postalCode">Postal code</label>
+                    <input id="postalCode" name="postalCode" type="text" />
+                </div>
+            </div>
+            <div class="field">
+                <label for="country">Country</label>
+                <input id="country" name="country" type="text" />
+            </div>
+            <div class="field">
+                <label for="notes">Delivery notes</label>
+                <textarea id="notes" name="notes" rows="3"></textarea>
+            </div>
+            <button type="button" id="clearBtn">Clear form</button>
+        </form>
+
+        <div class="pad" style="margin-top: 16px; margin-bottom: 0;">More nested scroll below the form</div>
+    </div>
+
+    <p class="hint">
+        Nested scroll: if the SuperComplete bubble drifts while scrolling this panel,
+        that matches the window-only scroll listener bug.
+    </p>
+
+    <script>
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            document.getElementById('addressForm').reset();
+        });
+    </script>
+</body>
+</html>
